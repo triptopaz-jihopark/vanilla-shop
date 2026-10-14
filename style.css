@@ -1,0 +1,195 @@
+@charset "utf-8";
+
+/* =========================================================
+   디자인 토큰
+   ========================================================= */
+:root {
+    --color-text: #1a1a1a;
+    --color-text-sub: #767676;
+    --color-text-weak: #aaaaaa;
+    --color-accent: #ff4d4f;
+    --color-star: #ffb400;
+    --color-border: #ebebeb;
+    --color-surface: #ffffff;
+    --color-surface-alt: #f5f5f7;
+
+    --radius-m: 10px;
+
+    --font-base: 'Pretendard', -apple-system, BlinkMacSystemFont,
+                 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+
+    --layout-max: 1200px;
+    --layout-gutter: clamp(16px, 4vw, 20px);
+}
+
+/* =========================================================
+   리셋
+   ========================================================= */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+:where(body, h1, h2, h3, p, ul, li, figure) {
+    margin: 0;
+    padding: 0;
+}
+
+:where(ul) {
+    list-style: none;
+}
+
+:where(img) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+body {
+    font-family: var(--font-base);
+    color: var(--color-text);
+    background: var(--color-surface);
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* =========================================================
+   header
+   ========================================================= */
+.header {
+    display: flex;
+    align-items: center;
+    height: 60px;
+    padding-inline: var(--layout-gutter);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.header__logo {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+/* =========================================================
+   layout
+   ========================================================= */
+.layout {
+    max-width: var(--layout-max);
+    margin-inline: auto;
+    padding: 32px var(--layout-gutter) 80px;
+}
+
+.layout__title {
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* =========================================================
+   product-list
+   ========================================================= */
+.product-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 32px 20px;
+
+    @media (width <= 767px) {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px 12px;
+    }
+}
+
+/* =========================================================
+   product-card
+   ========================================================= */
+.product-card {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+
+    &:hover .product-card__image {
+        transform: scale(1.04);
+    }
+}
+
+.product-card__thumb {
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    margin-bottom: 12px;
+    background: var(--color-surface-alt);
+    border-radius: var(--radius-m);
+}
+
+.product-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product-card__brand {
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-sub);
+}
+
+.product-card__name {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    min-height: 2.8em;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.4;
+
+    @media (width <= 767px) {
+        font-size: 13px;
+    }
+}
+
+.product-card__price-row {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.product-card__price {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* 할인율·원가 표시는 M5 이후 추가 예정
+.product-card__discount {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-accent);
+}
+
+.product-card__origin-price {
+    font-size: 13px;
+    color: var(--color-text-weak);
+}
+*/
+
+.product-card__rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--color-text-sub);
+}
+
+.product-card__star {
+    color: var(--color-star);
+}
+
+.product-card__review-count {
+    color: var(--color-text-weak);
+}
