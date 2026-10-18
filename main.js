@@ -36,4 +36,6 @@ function createProductCard(product) {
     `;
 }
 
-console.log(createProductCard(sampleProduct));
+// console.log(createProductCard(sampleProduct));
+const productList = document.querySelector(".product-list");
+productList.innerHTML = createProductCard(sampleProduct);
