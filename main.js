@@ -63,13 +63,24 @@ const productList = document.querySelector(".product-list");
 
 productList.innerHTML = sampleProducts.map((product) => createProductCard(product)).join("");
 
+// [리뷰용] 첫 시도 — await 없이 작성 → TypeError: response.json is not a function
 // const response = fetch("https://dummyjson.com/products");
 // const data = response.json();
 // console.log(data);
 
+// async/await
 async function loadProducts() {
     const response = await fetch("https://dummyjson.com/products");
     const data = await response.json();
     console.log(data);
 }
 loadProducts();
+
+// [리뷰용] .then() 버전 — async/await와 비교하려고 남겨둠
+fetch("https://dummyjson.com/products")
+    .then((response) => {
+        return response.json();
+    })
+    .then((data) => {
+        console.log(data);
+    });

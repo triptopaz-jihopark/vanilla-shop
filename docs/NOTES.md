@@ -244,3 +244,75 @@ console.log(data);               //    (실행되지 않음)
 ```
 
 Promise에는 `.json()` 메서드가 없다. **"데이터가 덜 왔다"가 아니라 "애초에 다른 타입"**이었다. 운송장에 대고 "상자 열어줘"라고 한 셈.
+
+---
+
+## `.then()` vs `async`/`await` (M1-6)
+
+같은 동작을 두 문법으로 작성해 비교했다.
+
+```js
+// async / await
+const response = await fetch(url);
+const data = await response.json();
+console.log(data);
+
+// .then()
+fetch(url)
+  .then((response) => { return response.json(); })
+  .then((data) => { console.log(data); });
+```
+
+### `.then()`도 Promise를 벗기는 도구다
+
+`await`가 "벗겨서 변수에 담아줘"라면, `.then()`은 "벗겨지면 이 함수에 넣어줘"다. **`.then()` 하나가 `await` 하나에 대응**하므로, 두 번 벗기면 `.then()`도 두 개다.
+
+`.then()` 안에서 **`return`한 값이 다음 `.then()`으로 전달**된다. Promise를 return하면 벗겨진 상태로 넘어간다. `return`을 빠뜨리면 다음 칸에 아무것도 가지 않는다.
+
+### 차이 ① 읽는 방향
+
+`async`/`await`는 동기 코드와 똑같이 위에서 아래로 읽힌다. `.then()`은 체인을 따라가야 한다.
+
+### 차이 ② 변수를 쓸 수 있는 범위 — 가장 실용적인 차이
+
+```js
+// await — 둘 다 같은 스코프에 있다
+const response = await fetch(url);
+const data = await response.json();
+// response, data 모두 접근 가능
+
+// .then() — 콜백 안에 갇힌다
+fetch(url)
+  .then((response) => { return response.json(); })
+  .then((data) => {
+      // response는 여기서 접근 불가
+  });
+```
+
+콜백의 매개변수는 그 함수 안에서만 산다. (`map`의 `product`를 바깥에서 쓰지 못했던 것과 같은 이유)
+
+**M1-10 에러 처리에서 문제가 된다.** `response.ok`를 확인하면서 `data`도 써야 하는데, `.then()` 방식에서는 두 값이 서로 다른 함수에 흩어져 있다.
+
+### 차이 ③ 에러 처리
+
+| | |
+|---|---|
+| `async`/`await` | `try` / `catch` — 일반 코드와 동일 |
+| `.then()` | 체인 끝에 `.catch()` |
+
+### 결론
+
+실무 기본은 `async`/`await`. `.then()`은 **읽을 줄만 알면 된다** — 오래된 코드나 라이브러리 예제에서 자주 만난다.
+
+### 줄여 쓰기
+
+화살표 함수는 중괄호 없이 쓰면 그 값을 자동으로 return한다.
+
+```js
+(x) => { return x * 2; }   // 길게
+(x) => x * 2               // 같은 뜻
+
+fetch(url)
+  .then((response) => response.json())
+  .then((data) => console.log(data));
+```
