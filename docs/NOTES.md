@@ -202,3 +202,45 @@ https://dummyjson.com/products?limit=5&select=title,price,thumbnail
 ### select
 
 필요한 필드만 받으면 응답이 가벼워진다. `FIELDS.md`에 정리한 목록을 서버에 직접 요청할 수 있다는 뜻이다.
+
+---
+
+## await는 Promise를 벗겨낸다 (M1-5)
+
+```js
+fetch(url)          // → Promise     약속 증서
+await fetch(url)    // → Response    실제 물건
+```
+
+`await`를 붙이면 Promise가 아니라 **그 안에 들어있던 값**이 나온다.
+
+> Promise는 물품 보관증이고, `await`는 보관증을 내고 물건을 받아오는 행위다. 결과는 보관증이 아니라 물건이다.
+
+### `await`가 두 번 필요한 이유 — Promise가 두 개다
+
+```
+① fetch(url)        →  Promise  ──await──→  Response
+② response.json()   →  Promise  ──await──→  { products: [...] }
+```
+
+`.json()`은 이미 벗겨진 Response에 대고 부르는 것이고, 그 `.json()`이 **새 Promise를 또 반환**한다. 본문을 다 받아 변환하는 데 시간이 걸리기 때문이다. 그래서 두 번째 `await`로 또 벗긴다.
+
+### 단계별로 아는 것
+
+| 시점 | 아는 것 |
+|---|---|
+| `fetch(url)` 직후 | **아무것도 모름.** 요청만 떠난 상태 |
+| `await fetch(url)` 이후 | 상태 코드·헤더 — 성공/실패를 안다 |
+| `await response.json()` 이후 | 실제 데이터 |
+
+이 2단계 덕분에 **본문을 받기 전에 실패를 알 수 있다.** (`response.ok`, `response.status` → M1-10에서 사용)
+
+### 처음 틀렸던 코드
+
+```js
+const response = fetch(url);     // response = Promise
+const data = response.json();    // ❌ TypeError: response.json is not a function
+console.log(data);               //    (실행되지 않음)
+```
+
+Promise에는 `.json()` 메서드가 없다. **"데이터가 덜 왔다"가 아니라 "애초에 다른 타입"**이었다. 운송장에 대고 "상자 열어줘"라고 한 셈.

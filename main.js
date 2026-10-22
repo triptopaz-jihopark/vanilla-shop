@@ -62,3 +62,14 @@ const productList = document.querySelector(".product-list");
 // join("")을 빼면 배열이 문자열로 변환될 때 쉼표가 들어간다.
 
 productList.innerHTML = sampleProducts.map((product) => createProductCard(product)).join("");
+
+// const response = fetch("https://dummyjson.com/products");
+// const data = response.json();
+// console.log(data);
+
+async function loadProducts() {
+    const response = await fetch("https://dummyjson.com/products");
+    const data = await response.json();
+    console.log(data);
+}
+loadProducts();
