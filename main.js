@@ -63,9 +63,6 @@ function createProductCard(product) {
 
 const productList = document.querySelector(".product-list");
 
-// 상품 배열 -> 카드 HTML 배열 -> 하나의 문자열로 삽입
-// productList.innerHTML = sampleProducts.map((product) => createProductCard(product)).join("");
-
 // async/await
 async function loadProducts() {
     const response = await fetch("https://dummyjson.com/products");
@@ -73,9 +70,10 @@ async function loadProducts() {
     return data.products;
 }
 
-// 상품 랜더링 rendering
+// 상품 렌더링
 // join("")을 빼면 배열이 문자열로 변환될 때 쉼표가 들어간다.
 async function render() {
+    productList.innerHTML = `<li class="product-list__loading">불러오는 중...</li>`;
     const products = await loadProducts();
     productList.innerHTML = products.map((product) => createProductCard(product)).join("");
 }
