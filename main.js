@@ -63,18 +63,29 @@ function createProductCard(product) {
 
 const productList = document.querySelector(".product-list");
 
-// async/await
+// 상품 API 호출
 async function loadProducts() {
     const response = await fetch("https://dummyjson.com/products");
+
+    if (!response.ok) {
+        throw new Error(`상품 목록 요청 실패 (${response.status})`);
+    }
+
     const data = await response.json();
     return data.products;
 }
 
 // 상품 렌더링
-// join("")을 빼면 배열이 문자열로 변환될 때 쉼표가 들어간다.
 async function render() {
     productList.innerHTML = `<li class="product-list__loading">불러오는 중...</li>`;
-    const products = await loadProducts();
-    productList.innerHTML = products.map((product) => createProductCard(product)).join("");
+    try {
+        const products = await loadProducts();
+
+        // join("")을 빼면 배열이 문자열로 변환될 때 쉼표가 들어간다.
+        productList.innerHTML = products.map((product) => createProductCard(product)).join("");
+    } catch (error) {
+        console.error(error);
+        productList.innerHTML = `<li class="product-list__error">상품 리스트를 불러올 수 없습니다.</li>`;
+    }
 }
 render();
