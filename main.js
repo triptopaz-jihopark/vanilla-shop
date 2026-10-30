@@ -89,3 +89,11 @@ async function render() {
     }
 }
 render();
+
+// const isProduction = (product) => true;
+// const isTest = function (env) {
+//     return true;
+// };
+// (function () {
+//     console.log("IEEF");
+// })();
