@@ -1187,3 +1187,230 @@ const productId = Number(clicked.dataset.id);
 > **타입 변환은 경계에서 한 번만.** 바깥에서 들어온 값(HTML 속성, 입력창, API 응답)을 받는 지점에서 정리해두면 안쪽 코드는 타입을 의심하지 않아도 된다. 중간중간 `Number()`가 흩어져 있으면 "여기선 숫자인가 문자인가"를 매번 확인해야 한다.
 
 `==`를 쓰면 `5 == "5"`가 `true`라 넘어가지만, 의도치 않은 변환이 숨어버리므로 쓰지 않는다.
+
+---
+
+## M2-4 — cart 배열에 상품 담기
+
+### 문제 — `products`를 클릭 핸들러에서 쓸 수 없었다
+
+```js
+async function render() {
+    const products = await loadProducts();   // ← 이 안에서만 살아 있다
+}
+
+productList.addEventListener("click", () => {
+    // 여기서 products 를 쓸 수 없다
+});
+```
+
+중괄호 `{}` 안에서 `const`/`let`으로 만든 변수는 **그 중괄호 안에서만** 보인다. `render`가 끝나면 `products`는 사라진다.
+
+> 집 안에 둔 물건은 집 안에서만 쓸 수 있다. 밖에서도 쓰려면 밖에 내놓아야 한다.
+
+### 해결 — 바깥으로 꺼낸다
+
+```js
+let products = [];                   // 바깥에 선언
+
+async function render() {
+    products = await loadProducts(); // const 를 떼고 바깥 변수에 담는다
+}
+```
+
+### `let` vs `const` — 이번에 둘 다 나왔다
+
+| 변수 | 선언 | 이유 |
+|---|---|---|
+| `products` | `let` | 빈 배열로 시작했다가 API 결과로 **통째로 갈아끼운다** |
+| `cart` | `const` | `push`로 **안의 내용만** 바꾼다. 배열 자체를 교체하지 않는다 |
+
+```js
+const cart = [];
+cart.push(상품);   // ✅ 내용을 바꾸는 것
+cart = [];        // ❌ 통째로 갈아끼우는 것 → TypeError
+```
+
+**`const`는 "이 변수가 가리키는 주소를 못 바꾼다"는 뜻**이지 내용물을 못 바꾼다는 뜻이 아니다. 집 주소는 고정이지만 가구는 옮길 수 있는 것과 같다.
+
+M1-12a의 "참조 타입은 주소를 담는다"가 여기서 그대로 쓰인다. `cart`에 담긴 것은 배열 자체가 아니라 **배열의 주소**이므로, 주소가 바뀌지 않는 한 `const`로 충분하다.
+
+> **멘토님 숙제 "let을 쓰는 케이스"가 이 코드에서 나왔다.** 교재 예제가 아니라 실제로 필요해서 쓰게 된 경우다.
+
+### `cart`에 무엇을 담을 것인가
+
+상품 **객체 전체**를 담기로 했다. M4 장바구니 화면에서 이미지 · 브랜드 · 가격이 모두 필요한데, id만 갖고 있으면 그때 다시 찾아와야 하기 때문이다.
+
+> dummyjson 상품 객체에는 `description`, `reviews`, `images`, `meta` 등 쓰지 않을 필드가 많다. M3에서 저장소에 담을 때 다시 검토한다.
+
+### 완성된 코드
+
+```js
+const cart = [];
+
+productList.addEventListener("click", (event) => {
+    const clicked = event.target;
+
+    if (clicked.classList.contains("product-card__add")) {
+        const productId = Number(clicked.dataset.id);
+        const product = products.find((p) => p.id === productId);
+        cart.push(product);
+    }
+});
+```
+
+`Number()`가 없으면 `find`가 **에러 없이** `undefined`를 돌려준다. 이유는 위 "dataset으로 꺼낸 값은 항상 문자열이다" 항목 참고.
+
+### 콜백 매개변수 이름
+
+```js
+products.find((product) => product.id === productId);   // 동작은 하지만 읽기 어렵다
+products.find((p) => p.id === productId);               // 관례
+```
+
+콜백 매개변수는 **그 괄호 안에서만 살다 사라지는 임시 이름**이라 짧아도 된다. 반대로 오래 쓸 변수는 길어도 명확한 편이 낫다. **수명이 짧을수록 이름도 짧게.**
+
+---
+
+## M2-5 — 헤더 숫자를 갱신하는 함수
+
+```js
+const cartCounter = document.querySelector(".cart-button__count");
+
+function updateCartCount() {
+    cartCounter.textContent = cart.length;
+}
+```
+
+### 요소는 한 번만 찾아서 변수에 담는다
+
+함수가 호출될 때마다 `querySelector`를 다시 돌리면 매번 문서 전체를 뒤진다. 자주 쓰는 번호를 단축번호에 저장해두는 것과 같다.
+
+### 글자를 바꾸는 속성 세 가지
+
+| 속성 | 하는 일 |
+|---|---|
+| `innerHTML` | 문자열을 **HTML로 해석**해서 넣는다 |
+| `textContent` | 문자열을 **글자 그대로** 넣는다 |
+| `innerText` | 글자를 넣되 **화면에 보이는 모양** 기준 |
+
+```js
+el.innerHTML   = "<b>3</b>";   // 굵은 3   (태그가 살아남)
+el.textContent = "<b>3</b>";   // <b>3</b> (글자 그대로)
+```
+
+**넣으려는 것이 태그면 `innerHTML`, 글자면 `textContent`.**
+
+`render()`에서 `innerHTML`을 쓴 것은 실제로 `<li>` 태그를 만들어야 했기 때문이고, 숫자 하나를 넣는 데는 `textContent`가 맞다.
+
+`innerHTML`은 바깥에서 들어온 값(사용자 입력, API 응답)을 넣을 때 **스크립트가 섞여 들어올 수 있다.** 실무에서 `innerHTML`을 조심하라고 하는 이유다. 기본값은 `textContent`.
+
+### 겪은 에러 — ReferenceError
+
+```js
+const cartCounter = ...;        // er 로 끝남
+
+function updateCartCount() {
+    cartCounter.textContent = cart.length;
+    console.log(cartCount);     // ← 그런 변수는 없다
+}
+```
+
+```
+Uncaught ReferenceError: cartCount is not defined
+```
+
+| 에러 | 뜻 |
+|---|---|
+| `ReferenceError` | 그런 이름의 변수가 **아예 없다** (오타이거나 스코프 밖) |
+| `TypeError` | 있긴 한데 **그렇게 쓸 수 없다** (예: `true()`) |
+
+**뱃지 숫자는 바뀌었는데 콘솔엔 에러가 떠 있었다.** 에러 나기 전 줄이 먼저 실행됐기 때문이다. 화면이 멀쩡해 보여도 콘솔은 확인해야 한다.
+
+### 테스트는 파일이 아니라 콘솔에서
+
+일회성 확인 코드를 파일에 적으면 지우는 것을 잊고 커밋된다. 브라우저 콘솔은 새로고침하면 사라지므로 안전하다.
+
+---
+
+## M2-6 — 담기와 헤더 숫자 연결
+
+```js
+cart.push(product);
+updateCartCount();
+```
+
+이 한 줄로 **떨어져 있는 두 영역이 하나의 데이터를 통해 연결된다.**
+
+```
+담기 클릭 → cart 변경 → updateCartCount() → 헤더 반영
+            └─ 데이터 ─┘   └─ 화면 갱신 ─┘
+```
+
+M5에서 "상태 중심으로 재구성"할 때 이 모양이 그대로 커진다. **데이터를 바꾸고 화면 갱신 함수를 부른다** — 프레임워크가 하는 일도 본질은 같다.
+
+### 함수 선언식의 호이스팅
+
+```js
+productList.addEventListener("click", ...);   // 여기서 호출
+function updateCartCount() { ... }            // 정의는 아래
+```
+
+정의보다 위에서 호출하는데 동작한다.
+
+```js
+// 함수 선언식 — 호이스팅된다
+sayHi();                    // ✅
+function sayHi() {}
+
+// 함수 표현식 — 그 줄이 실행된 뒤부터
+sayHi();                    // ❌ ReferenceError
+const sayHi = () => {};
+```
+
+**호이스팅** — 함수 선언식은 파일을 읽을 때 미리 등록되어, 적힌 위치보다 위에서도 부를 수 있다.
+
+다만 **지금 코드는 어느 쪽이어도 동작한다.** `updateCartCount()`를 부르는 시점이 "클릭했을 때"라서 그때쯤이면 파일이 이미 다 실행된 뒤다. **차이는 즉시 호출할 때 드러난다.**
+
+---
+
+## 참조 확인 — cart와 products는 같은 객체였다
+
+```js
+console.log(cart[0] === products.find((p) => p.id === cart[0].id));   // true
+```
+
+`cart.push(product)`는 **주소를 한 번 더 적은 것**이다. 복사본이 아니다.
+
+```
+products  [ ●———, ●———, ●——— ]
+              │
+              ↓  주소만 베낌
+cart      [ ●——— ]
+```
+
+`map`은 그래도 **새 배열이라는 상자**는 만들었다(M1-12b). 지금은 상자조차 거치지 않았다.
+
+### 증명
+
+```js
+cart[0].quantity = 99;
+products.find((p) => p.id === cart[0].id).quantity;   // 99
+```
+
+`cart`만 건드렸는데 `products`가 같이 바뀐다.
+
+### M2-7에서 터지는 지점
+
+```
+1. 상품 A 담기      → cart에 A, 수량 1   (products의 A에도 quantity 1이 생김)
+2. 장바구니 비우기   → cart = []          (products의 A엔 quantity 1이 그대로 남음)
+3. 상품 A 다시 담기  → find로 찾은 A에 이미 quantity 1
+                    → +1 하면 2가 됨  ❌ 처음 담았는데 수량이 2
+```
+
+**에러는 나지 않고 숫자만 조용히 틀린다.** M1-12d에 적어둔 그대로다.
+
+### 대응 (M2-7에서 진행)
+
+`cart`에는 `products`와 분리된 객체를 넣는다. 전개 구문으로 복사한 뒤 `quantity`를 얹는다.

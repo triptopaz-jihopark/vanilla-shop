@@ -63,7 +63,9 @@ function createProductCard(product) {
 }
 
 const productList = document.querySelector(".product-list");
+const cartCounter = document.querySelector(".cart-button__count");
 let products = [];
+
 // 상품 API 호출
 async function loadProducts() {
     const response = await fetch("https://dummyjson.com/products");
@@ -108,7 +110,10 @@ productList.addEventListener("click", (event) => {
         const productId = Number(clicked.dataset.id);
         const product = products.find((p) => p.id === productId);
         cart.push(product);
-        console.log(cart);
-        console.log(cart[0] === products.find((p) => p.id === cart[0].id));
+        updateCartCount();
     }
 });
+
+function updateCartCount() {
+    cartCounter.textContent = cart.length;
+}
