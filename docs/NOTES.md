@@ -1059,3 +1059,131 @@ arr.with(0, 99)    // 0번째만 바꾼 새 배열
 원본을 바꾸는 메서드를 모르고 쓰면 **에러 없이 조용히** 다른 곳이 망가진다. M4에서 장바구니를 다루고 M5에서 필터·정렬을 다룰 때 바로 나타난다.
 
 **기본 전략: 가능하면 원본을 바꾸지 않는 쪽을 쓴다.** 꼭 바꿔야 할 때만 변경 메서드를 쓰고, 그때는 "지금 원본을 바꾸고 있다"를 의식한다.
+
+---
+
+# M2-1 ~ M2-3 정리 (2026-11-04)
+
+## M2-1 — 헤더 장바구니 아이콘과 뱃지
+
+`index.html` 헤더에 버튼을 추가하고, 숫자를 담을 `<span>`을 안에 두었다.
+
+```html
+<button class="cart-button" type="button" aria-label="장바구니">
+    <svg class="cart-button__icon" ...></svg>
+    <span class="cart-button__count">0</span>
+</button>
+```
+
+- 숫자는 지금 `0`으로 고정이다. M2-5에서 JS가 이 값을 바꾼다.
+- 아이콘 `<svg>`에 `aria-hidden="true"`를 주고 버튼에 `aria-label`을 둔다. 아이콘은 읽어줄 내용이 없고, 버튼의 이름은 따로 알려줘야 하기 때문이다.
+- 뱃지는 `position: absolute`로 아이콘 위에 겹친다. 부모인 `.cart-button`에 `position: relative`가 있어야 기준이 잡힌다.
+
+## M2-2 — 상품 카드에 담기 버튼
+
+`createProductCard`의 템플릿 리터럴 안에 버튼을 추가했다.
+
+```html
+<button class="product-card__add" type="button" data-id="${product.id}">담기</button>
+```
+
+`<li>`에도 `data-id`가 있지만 버튼에도 넣었다. **클릭된 요소에서 바로 id를 꺼내기 위해서**다.
+
+---
+
+## M2-3 — 이벤트 위임
+
+### 버튼마다 리스너를 달면 안 되는 이유
+
+```js
+// 이 방식은 이 프로젝트에서 동작하지 않는다
+document.querySelectorAll(".product-card__add").forEach((button) => {
+    button.addEventListener("click", ...);
+});
+```
+
+**① 등록 시점에 버튼이 아직 없다.**
+버튼은 `fetch`가 끝나고 `innerHTML`에 꽂힌 뒤에야 생긴다. 그 전에 `querySelectorAll`을 돌리면 결과가 0개다.
+
+**② `innerHTML`을 다시 쓰면 리스너가 사라진다.**
+목록을 다시 그리는 순간 기존 버튼은 통째로 버려진다. 거기 달아둔 리스너도 함께 사라진다. M5에서 필터·정렬을 넣으면 바로 겪게 된다.
+
+### 해결 — 부모에 하나만 단다
+
+```js
+productList.addEventListener("click", (event) => {
+    const clicked = event.target;
+
+    if (clicked.classList.contains("product-card__add")) {
+        const productId = Number(clicked.dataset.id);
+        console.log(productId);
+    }
+});
+```
+
+`.product-list`는 `index.html`에 처음부터 있고 `innerHTML`로 바뀌는 건 그 **안쪽**이라, 리스너가 계속 살아 있다.
+
+> 아파트 경비실. 집집마다 우편함을 관리하는 대신 1층 경비실 하나를 두고 "몇 호 거지?"를 판단해 전달한다. 세대가 이사를 들고 나도 경비실은 그대로다.
+
+### `event.target`은 "실제로 눌린 가장 안쪽 요소"다
+
+리스너는 `<ul>`에 달았지만 `event.target`은 `<ul>`이 아니다.
+
+| 클릭한 곳 | `event.target` |
+|---|---|
+| 상품 이미지 | `<img class="product-card__image">` |
+| 상품명 | `<h3 class="product-card__name">` |
+| 담기 버튼 | `<button class="product-card__add">` |
+
+그래서 **"담기 버튼이 맞는지" 걸러내는 과정이 반드시 필요하다.** 필터가 없으면 이미지를 눌러도 담기가 실행된다.
+
+### 이번에 쓴 DOM API
+
+| 문법 | 하는 일 |
+|---|---|
+| `event.target` | 실제로 클릭된 요소 |
+| `element.classList.contains("클래스명")` | 그 클래스를 가졌는지 `true` / `false` |
+| `element.dataset.id` | `data-id` 속성값을 꺼낸다 |
+
+---
+
+## `dataset`으로 꺼낸 값은 항상 문자열이다
+
+### 확인
+
+```js
+console.log(productId, typeof productId);   // "5" string
+```
+
+### 이유
+
+**HTML 속성값은 예외 없이 문자열이다.** HTML에는 숫자 타입이라는 개념 자체가 없다. `data-id="5"`의 `5`는 숫자가 아니라 글자다.
+
+`dataset`은 속성을 **있는 그대로 읽어오는 통로**라 타입을 바꾸지 않는다. `getAttribute()`, `input.value`도 같은 이유로 항상 문자열이다.
+
+### 그냥 두면 어디서 터지나
+
+```js
+const product = products.find((p) => p.id === productId);
+//                                   숫자      문자열
+//                                    5   ===   "5"   →  false
+```
+
+**영원히 `undefined`가 나온다. 그런데 에러는 나지 않는다.** `find`는 못 찾으면 조용히 `undefined`를 돌려주기 때문이다.
+
+M1-12에서 정리한 두 가지가 여기서 만난다.
+
+- `find`는 못 찾으면 `undefined` (에러 아님)
+- `===`는 값뿐 아니라 **타입까지** 같아야 `true`
+
+### 대응
+
+```js
+const productId = Number(clicked.dataset.id);
+```
+
+**꺼내는 그 자리에서 바로 숫자로 바꾼다.** 그 아래로는 전부 숫자이므로 더 신경 쓸 일이 없다.
+
+> **타입 변환은 경계에서 한 번만.** 바깥에서 들어온 값(HTML 속성, 입력창, API 응답)을 받는 지점에서 정리해두면 안쪽 코드는 타입을 의심하지 않아도 된다. 중간중간 `Number()`가 흩어져 있으면 "여기선 숫자인가 문자인가"를 매번 확인해야 한다.
+
+`==`를 쓰면 `5 == "5"`가 `true`라 넘어가지만, 의도치 않은 변환이 숨어버리므로 쓰지 않는다.

@@ -57,12 +57,13 @@ function createProductCard(product) {
                 <span class="product-card__score">${product.rating}</span>
                 <span class="product-card__review-count">리뷰 ${product.reviews.length}</span>
             </p>
+            <button class="product-card__add" type="button" data-id="${product.id}">담기</button>
         </li>
     `;
 }
 
 const productList = document.querySelector(".product-list");
-
+let products = [];
 // 상품 API 호출
 async function loadProducts() {
     const response = await fetch("https://dummyjson.com/products");
@@ -79,7 +80,7 @@ async function loadProducts() {
 async function render() {
     productList.innerHTML = `<li class="product-list__loading">불러오는 중...</li>`;
     try {
-        const products = await loadProducts();
+        products = await loadProducts();
 
         // join("")을 빼면 배열이 문자열로 변환될 때 쉼표가 들어간다.
         productList.innerHTML = products.map((product) => createProductCard(product)).join("");
@@ -97,3 +98,17 @@ render();
 // (function () {
 //     console.log("IEEF");
 // })();
+
+const cart = [];
+
+productList.addEventListener("click", (event) => {
+    const clicked = event.target;
+
+    if (clicked.classList.contains("product-card__add")) {
+        const productId = Number(clicked.dataset.id);
+        const product = products.find((p) => p.id === productId);
+        cart.push(product);
+        console.log(cart);
+        console.log(cart[0] === products.find((p) => p.id === cart[0].id));
+    }
+});
