@@ -126,7 +126,7 @@ console.log(products); // undefined
 **Promise**가 반환된다.
 
 ```js
-console.log(fetch('https://dummyjson.com/products'));
+console.log(fetch("https://dummyjson.com/products"));
 // Promise {<pending>}
 ```
 
@@ -146,10 +146,10 @@ Promise는 **"나중에 결과를 주겠다"는 약속 증서**다. `pending`은
 
 `async`는 두 가지를 선언한다.
 
-| | |
-|---|---|
-| ① | 이 함수는 **멈췄다 재개할 수 있다** |
-| ② | 이 함수는 **Promise를 반환한다** |
+|     |                                     |
+| --- | ----------------------------------- |
+| ①   | 이 함수는 **멈췄다 재개할 수 있다** |
+| ②   | 이 함수는 **Promise를 반환한다**    |
 
 ②가 필요한 이유 — 함수가 중간에 멈추면 호출한 쪽은 결과를 당장 못 받는다. 아무것도 안 주면 기다릴 방법이 없으므로, "나중에 줄게"라는 약속 증서를 먼저 건네야 한다.
 
@@ -175,10 +175,10 @@ loadProducts();                   // 호출도 잊지 말 것
 
 ## dummyjson 쿼리 파라미터 (M1-4e)
 
-| 파라미터 | 역할 |
-|---|---|
-| `limit` | 지정한 숫자의 개수만큼만 객체를 불러온다 |
-| `skip` | 지정한 숫자만큼 순서를 건너뛰고 그다음 객체부터 불러온다 |
+| 파라미터 | 역할                                                        |
+| -------- | ----------------------------------------------------------- |
+| `limit`  | 지정한 숫자의 개수만큼만 객체를 불러온다                    |
+| `skip`   | 지정한 숫자만큼 순서를 건너뛰고 그다음 객체부터 불러온다    |
 | `select` | 객체의 프로퍼티 중 지정한 프로퍼티만 불러온다 (쉼표로 구분) |
 
 ```
@@ -208,8 +208,8 @@ https://dummyjson.com/products?limit=5&select=title,price,thumbnail
 ## await는 Promise를 벗겨낸다 (M1-5)
 
 ```js
-fetch(url)          // → Promise     약속 증서
-await fetch(url)    // → Response    실제 물건
+fetch(url); // → Promise     약속 증서
+await fetch(url); // → Response    실제 물건
 ```
 
 `await`를 붙이면 Promise가 아니라 **그 안에 들어있던 값**이 나온다.
@@ -227,20 +227,20 @@ await fetch(url)    // → Response    실제 물건
 
 ### 단계별로 아는 것
 
-| 시점 | 아는 것 |
-|---|---|
-| `fetch(url)` 직후 | **아무것도 모름.** 요청만 떠난 상태 |
-| `await fetch(url)` 이후 | 상태 코드·헤더 — 성공/실패를 안다 |
-| `await response.json()` 이후 | 실제 데이터 |
+| 시점                         | 아는 것                             |
+| ---------------------------- | ----------------------------------- |
+| `fetch(url)` 직후            | **아무것도 모름.** 요청만 떠난 상태 |
+| `await fetch(url)` 이후      | 상태 코드·헤더 — 성공/실패를 안다   |
+| `await response.json()` 이후 | 실제 데이터                         |
 
 이 2단계 덕분에 **본문을 받기 전에 실패를 알 수 있다.** (`response.ok`, `response.status` → M1-10에서 사용)
 
 ### 처음 틀렸던 코드
 
 ```js
-const response = fetch(url);     // response = Promise
-const data = response.json();    // ❌ TypeError: response.json is not a function
-console.log(data);               //    (실행되지 않음)
+const response = fetch(url); // response = Promise
+const data = response.json(); // ❌ TypeError: response.json is not a function
+console.log(data); //    (실행되지 않음)
 ```
 
 Promise에는 `.json()` 메서드가 없다. **"데이터가 덜 왔다"가 아니라 "애초에 다른 타입"**이었다. 운송장에 대고 "상자 열어줘"라고 한 셈.
@@ -259,8 +259,12 @@ console.log(data);
 
 // .then()
 fetch(url)
-  .then((response) => { return response.json(); })
-  .then((data) => { console.log(data); });
+    .then((response) => {
+        return response.json();
+    })
+    .then((data) => {
+        console.log(data);
+    });
 ```
 
 ### `.then()`도 Promise를 벗기는 도구다
@@ -283,10 +287,12 @@ const data = await response.json();
 
 // .then() — 콜백 안에 갇힌다
 fetch(url)
-  .then((response) => { return response.json(); })
-  .then((data) => {
-      // response는 여기서 접근 불가
-  });
+    .then((response) => {
+        return response.json();
+    })
+    .then((data) => {
+        // response는 여기서 접근 불가
+    });
 ```
 
 콜백의 매개변수는 그 함수 안에서만 산다. (`map`의 `product`를 바깥에서 쓰지 못했던 것과 같은 이유)
@@ -295,10 +301,10 @@ fetch(url)
 
 ### 차이 ③ 에러 처리
 
-| | |
-|---|---|
+|                 |                                    |
+| --------------- | ---------------------------------- |
 | `async`/`await` | `try` / `catch` — 일반 코드와 동일 |
-| `.then()` | 체인 끝에 `.catch()` |
+| `.then()`       | 체인 끝에 `.catch()`               |
 
 ### 결론
 
@@ -309,12 +315,14 @@ fetch(url)
 화살표 함수는 중괄호 없이 쓰면 그 값을 자동으로 return한다.
 
 ```js
-(x) => { return x * 2; }   // 길게
-(x) => x * 2               // 같은 뜻
+(x) => {
+    return x * 2;
+}; // 길게
+(x) => x * 2; // 같은 뜻
 
 fetch(url)
-  .then((response) => response.json())
-  .then((data) => console.log(data));
+    .then((response) => response.json())
+    .then((data) => console.log(data));
 ```
 
 ---
@@ -328,9 +336,9 @@ fetch(url)
 **문제 상황** — 서로 상관없는 요청인데 줄을 세우게 된다.
 
 ```js
-const a = await fetch(url1);   // 1초
-const b = await fetch(url2);   // 또 1초
-const c = await fetch(url3);   // 또 1초
+const a = await fetch(url1); // 1초
+const b = await fetch(url2); // 또 1초
+const c = await fetch(url3); // 또 1초
 // 총 3초
 ```
 
@@ -351,8 +359,8 @@ const results = await Promise.all([fetch(url1), fetch(url2), fetch(url3)]);
 **원본 메모와 다른 점**
 
 ```js
-Promise.all(fn1, fn2, fn3)            // ❌ 인자 3개
-Promise.all([fn1(), fn2(), fn3()])    // ✅ 배열 하나 + 함수를 호출
+Promise.all(fn1, fn2, fn3); // ❌ 인자 3개
+Promise.all([fn1(), fn2(), fn3()]); // ✅ 배열 하나 + 함수를 호출
 ```
 
 `Promise.all`은 **배열 하나**를 받는다. 그리고 함수 자체가 아니라 **호출 결과(Promise)**를 넣어야 한다. `fn1`은 함수고, `fn1()`이 Promise다.
@@ -376,11 +384,15 @@ Promise.all([fn1(), fn2(), fn3()])    // ✅ 배열 하나 + 함수를 호출
 
 ```js
 // 원본 — list가 undefined가 된다
-Array.prototype.first = function (list) { return { ...list[0] }; };
-sampleProducts.first();   // 인자 없이 호출
+Array.prototype.first = function (list) {
+    return { ...list[0] };
+};
+sampleProducts.first(); // 인자 없이 호출
 
 // 수정 — this가 호출한 배열을 가리킨다
-Array.prototype.first = function () { return { ...this[0] }; };
+Array.prototype.first = function () {
+    return { ...this[0] };
+};
 ```
 
 메서드 안에서 **"나를 호출한 그 배열"**을 가리키는 것은 `this`다.
@@ -388,8 +400,8 @@ Array.prototype.first = function () { return { ...this[0] }; };
 **진짜 포인트는 `{ ...list[0] }`**
 
 ```js
-return list[0];         // 원본 객체를 그대로 돌려줌 → 받은 쪽에서 고치면 원본도 바뀜
-return { ...list[0] };  // 내용을 복사한 새 객체 → 고쳐도 원본이 안전
+return list[0]; // 원본 객체를 그대로 돌려줌 → 받은 쪽에서 고치면 원본도 바뀜
+return { ...list[0] }; // 내용을 복사한 새 객체 → 고쳐도 원본이 안전
 ```
 
 멘토가 "map 안의 객체는 새로운 것이 아니다"라고 한 바로 그 지점. (→ 태스크 1-12b)
@@ -400,10 +412,10 @@ return { ...list[0] };  // 내용을 복사한 새 객체 → 고쳐도 원본�
 
 ### 이어지는 곳
 
-| 메모 | 연결 |
-|---|---|
-| `Promise.all` | M1-6에서 짚은 "여러 요청 동시 처리" |
-| `Array.prototype` | M1-12 "배열 메서드와 참조/값" |
+| 메모              | 연결                                |
+| ----------------- | ----------------------------------- |
+| `Promise.all`     | M1-6에서 짚은 "여러 요청 동시 처리" |
+| `Array.prototype` | M1-12 "배열 메서드와 참조/값"       |
 
 ---
 
@@ -413,19 +425,19 @@ return { ...list[0] };  // 내용을 복사한 새 객체 → 고쳐도 원본�
 
 ### 구조
 
-| 함수 | 받는 것 | 돌려주는 것 |
-|---|---|---|
-| `createProductCard` | 상품 객체 1개 | HTML 문자열 |
-| `loadProducts` | 없음 | 상품 배열 (Promise에 싸여서) |
-| `render` | 없음 | 없음 — 화면을 바꾸는 것이 목적 |
+| 함수                | 받는 것       | 돌려주는 것                    |
+| ------------------- | ------------- | ------------------------------ |
+| `createProductCard` | 상품 객체 1개 | HTML 문자열                    |
+| `loadProducts`      | 없음          | 상품 배열 (Promise에 싸여서)   |
+| `render`            | 없음          | 없음 — 화면을 바꾸는 것이 목적 |
 
 ### 헷갈렸던 것 ① — `return data`가 맞나?
 
 맞다. 다만 **`async` 함수의 반환값은 Promise에 싸여서 나온다.**
 
 ```js
-const result = loadProducts();        // Promise {<pending>}
-const result = await loadProducts();  // 실제 배열
+const result = loadProducts(); // Promise {<pending>}
+const result = await loadProducts(); // 실제 배열
 ```
 
 `fetch`가 Promise를 돌려줬던 것과 같다. **`async` 함수는 전부 그렇다.** 그래서 받는 쪽에서 또 `await`로 벗겨야 하고, 그러려면 받는 쪽도 `async` 함수여야 한다. 비동기가 전염되는 이유다.
@@ -434,16 +446,16 @@ const result = await loadProducts();  // 실제 배열
 
 "받다/돌려주다"에 두 가지 뜻이 섞여 있었다.
 
-| | 뜻 | 확인 방법 |
-|---|---|---|
-| 문법적 입출력 | 괄호로 받고 `return`으로 내보내는 것 | 코드에 적혀 있음 |
-| 하는 일(효과) | 함수가 일으키는 변화 | 함수 몸통을 읽어야 앎 |
+|               | 뜻                                   | 확인 방법             |
+| ------------- | ------------------------------------ | --------------------- |
+| 문법적 입출력 | 괄호로 받고 `return`으로 내보내는 것 | 코드에 적혀 있음      |
+| 하는 일(효과) | 함수가 일으키는 변화                 | 함수 몸통을 읽어야 앎 |
 
 `render()`는 괄호가 비어 있고 `return`이 없다. `products`는 밖에서 받은 것이 아니라 **직접 가서 가져온 것**이고, 만든 `<li>`들은 `return`으로 나가는 것이 아니라 **DOM에 직접 꽂힌다.**
 
 ```js
 const result = await render();
-console.log(result);   // undefined
+console.log(result); // undefined
 ```
 
 그래서 `createProductCard`는 어디서든 쓸 수 있지만, `render`는 `.product-list`가 있는 페이지에서만 동작한다. **바깥을 안 건드리는 함수가 재사용하기 쉽다.**
@@ -488,7 +500,7 @@ Uncaught (in promise) SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not 
 ### 핵심 — `fetch`는 404를 에러로 보지 않는다
 
 ```js
-const response = await fetch(".../productss");   // ✅ 정상 통과
+const response = await fetch(".../productss"); // ✅ 정상 통과
 ```
 
 **"요청을 보내고 답을 받는 데 성공했다"**는 관점이다. 답의 내용이 404일 뿐이다.
@@ -561,18 +573,18 @@ async function render() {
 **메서드가 아니라 속성**이다. 괄호로 구분한다.
 
 ```js
-response.json()   // 괄호 있음 → 메서드. 동작
-response.ok       // 괄호 없음 → 속성. 값
+response.json(); // 괄호 있음 → 메서드. 동작
+response.ok; // 괄호 없음 → 속성. 값
 ```
 
 상태 코드가 **200~299면 `true`**, 그 외는 `false`. 정확한 코드는 `response.status`로 본다. **분기는 `ok`로, 로그에는 `status`로.**
 
 그리고 이것은 JS 언어가 아니라 **브라우저가 제공하는 것**이다.
 
-| 어디서 왔나 | 예 |
-|---|---|
-| JavaScript 언어 자체 | `map`, `filter`, `length`, `Promise` |
-| 브라우저가 제공 | `document`, `fetch`, `Response.ok`, `localStorage` |
+| 어디서 왔나          | 예                                                 |
+| -------------------- | -------------------------------------------------- |
+| JavaScript 언어 자체 | `map`, `filter`, `length`, `Promise`               |
+| 브라우저가 제공      | `document`, `fetch`, `Response.ok`, `localStorage` |
 
 Node.js(서버)에는 `document`가 없다. "분명 되는 코드인데 여기선 안 되네?" 할 때 이 구분을 떠올릴 것.
 
@@ -601,8 +613,8 @@ Node.js(서버)에는 `document`가 없다. "분명 되는 코드인데 여기�
 ### `console.error`를 쓸 것
 
 ```js
-console.log(error);    // 흰 글씨
-console.error(error);  // 빨간 글씨 + 스택 추적 + Errors 필터에 잡힘
+console.log(error); // 흰 글씨
+console.error(error); // 빨간 글씨 + 스택 추적 + Errors 필터에 잡힘
 ```
 
 그리고 `catch (error)`로 받아놓고 안 쓰면 **에러가 조용히 사라진다.** 사용자에겐 친절한 메시지, 개발자에겐 실제 에러 — 둘 다 필요하다.
@@ -624,10 +636,10 @@ console.error(error);  // 빨간 글씨 + 스택 추적 + Errors 필터에 잡�
 
 ### 변수에 무엇이 담기는가
 
-| | 변수에 담기는 것 |
-|---|---|
-| **원시 타입** (숫자, 문자열, boolean, null, undefined) | **값 자체** |
-| **참조 타입** (객체, 배열, 함수) | **값이 있는 곳의 주소** |
+|                                                        | 변수에 담기는 것        |
+| ------------------------------------------------------ | ----------------------- |
+| **원시 타입** (숫자, 문자열, boolean, null, undefined) | **값 자체**             |
+| **참조 타입** (객체, 배열, 함수)                       | **값이 있는 곳의 주소** |
 
 > 원시 타입은 쪽지에 숫자를 적어두는 것. 복사하면 쪽지가 두 장 생기고 서로 무관하다.
 > 참조 타입은 쪽지에 **집 주소**를 적어두는 것. 복사하면 쪽지는 두 장이지만 **가리키는 집은 하나**다.
@@ -635,24 +647,31 @@ console.error(error);  // 빨간 글씨 + 스택 추적 + Errors 필터에 잡�
 ### 실험 결과
 
 ```js
-let a = 1;  let b = a;  b = 2;
-console.log(a);        // 1    ← 값을 복사했으므로 별개
+let a = 1;
+let b = a;
+b = 2;
+console.log(a); // 1    ← 값을 복사했으므로 별개
 
-let obj1 = {n:1};  let obj2 = obj1;  obj2.n = 2;
-console.log(obj1.n);   // 2    ← 같은 집을 고쳤다
+let obj1 = { n: 1 };
+let obj2 = obj1;
+obj2.n = 2;
+console.log(obj1.n); // 2    ← 같은 집을 고쳤다
 
-const arr1 = [1,2,3];  const arr2 = arr1;  arr2.push(4);
-console.log(arr1);     // [1,2,3,4]  ← 같은 배열
+const arr1 = [1, 2, 3];
+const arr2 = arr1;
+arr2.push(4);
+console.log(arr1); // [1,2,3,4]  ← 같은 배열
 
-const arr = [1,2,3];  arr.push(4);
-console.log(arr);      // [1,2,3,4]  ← const여도 내용은 바꿀 수 있다
+const arr = [1, 2, 3];
+arr.push(4);
+console.log(arr); // [1,2,3,4]  ← const여도 내용은 바꿀 수 있다
 ```
 
 ### 헷갈렸던 것 — 등호 왼쪽에 점이 있는가
 
 ```js
-obj4.n = 2;       // 왼쪽에 점(.)  → 집 안의 가구를 바꾼다      → 원본도 바뀜
-obj4 = { n: 2 };  // 왼쪽이 변수   → 쪽지를 새 주소로 바꿔 쓴다  → 원본은 그대로
+obj4.n = 2; // 왼쪽에 점(.)  → 집 안의 가구를 바꾼다      → 원본도 바뀜
+obj4 = { n: 2 }; // 왼쪽이 변수   → 쪽지를 새 주소로 바꿔 쓴다  → 원본은 그대로
 ```
 
 ```
@@ -674,27 +693,27 @@ obj4 = {n:2}:      obj3 ─────→ [집A: {n:1}]   ← 그대로
 
 ```js
 const arr = [1, 2, 3];
-arr = [4, 5, 6];   // ❌ 왼쪽이 변수 자체 → const가 막음
-arr.push(4);       // ✅ 변수를 안 건드림
-arr[0] = 99;       // ✅ 집 안을 바꾸는 것
+arr = [4, 5, 6]; // ❌ 왼쪽이 변수 자체 → const가 막음
+arr.push(4); // ✅ 변수를 안 건드림
+arr[0] = 99; // ✅ 집 안을 바꾸는 것
 ```
 
 **`const`는 "쪽지를 다시 쓰지 마라"는 뜻이다.** 집 안을 어떻게 고치든 상관하지 않는다.
 
 ### 두 질문을 분리할 것
 
-| | 질문 | 답 |
-|---|---|---|
-| A | 재할당이 **가능한가?** | `let`이면 O, `const`면 X |
-| B | 재할당하면 **원본도 바뀌나?** | 아니오. 내 쪽지만 바뀐다 |
+|     | 질문                          | 답                       |
+| --- | ----------------------------- | ------------------------ |
+| A   | 재할당이 **가능한가?**        | `let`이면 O, `const`면 X |
+| B   | 재할당하면 **원본도 바뀌나?** | 아니오. 내 쪽지만 바뀐다 |
 
 `const`는 A만 통제한다. B는 `let`이든 `const`든 항상 같다.
 
 ### 진짜로 복사하려면 — 새 집을 짓는다
 
 ```js
-const obj2 = { ...obj1 };   // 내용을 옮겨 담은 새 객체
-const arr2 = [...arr1];     // 새 배열
+const obj2 = { ...obj1 }; // 내용을 옮겨 담은 새 객체
+const arr2 = [...arr1]; // 새 배열
 ```
 
 멘토 메모의 `{ ...list[0] }`가 이것이다. 다만 **한 겹만** 새로 짓는다(얕은 복사). → M1-12b
@@ -704,8 +723,8 @@ const arr2 = [...arr1];     // 새 배열
 M4에서 이런 버그가 난다.
 
 ```js
-const item = products.find((p) => p.id === 1);   // 주소를 받음
-item.quantity = 3;                                // 장바구니 수량 변경
+const item = products.find((p) => p.id === 1); // 주소를 받음
+item.quantity = 3; // 장바구니 수량 변경
 // → 상품 목록의 원본 상품도 quantity가 3이 된다
 ```
 
@@ -727,7 +746,9 @@ item.quantity = 3;                                // 장바구니 수량 변경
 ### 두 가지를 구분할 것
 
 ```js
-sampleProducts.map((i) => { console.log(i); });
+sampleProducts.map((i) => {
+    console.log(i);
+});
 //                   ↑           ↑
 //          콜백이 받는 것    여기서 찍히는 것 = 요소 하나(객체)
 ```
@@ -735,8 +756,10 @@ sampleProducts.map((i) => { console.log(i); });
 `console.log(i)`는 **배열 안을 들여다본 것**이다. `map` 자체가 무엇을 돌려주는지는 결과를 받아서 찍어야 보인다.
 
 ```js
-const result = sampleProducts.map((i) => { console.log(i); });
-console.log(result);   // [undefined, undefined, undefined]  ← 배열이다
+const result = sampleProducts.map((i) => {
+    console.log(i);
+});
+console.log(result); // [undefined, undefined, undefined]  ← 배열이다
 ```
 
 콜백이 아무것도 `return` 안 했으니 안은 `undefined`지만 **상자 자체는 배열**이고, **요소 3개가 들어가 3개가 나왔다.**
@@ -745,9 +768,9 @@ console.log(result);   // [undefined, undefined, undefined]  ← 배열이다
 
 M1-7에서 화면이 비었던 이유가 이것이었다. (`return` 누락 → `[undefined, ...]` → `join("")` → `""`)
 
-| | 무엇인가 |
-|---|---|
-| 콜백의 매개변수 | 배열의 **요소 하나** |
+|                     | 무엇인가                         |
+| ------------------- | -------------------------------- |
+| 콜백의 매개변수     | 배열의 **요소 하나**             |
 | `map(...)`의 반환값 | **새 배열** (요소 개수는 그대로) |
 
 ### 새 배열이지만 안의 객체는 새것이 아니다
@@ -755,8 +778,8 @@ M1-7에서 화면이 비었던 이유가 이것이었다. (`return` 누락 → `
 ```js
 const copied = sampleProducts.map((p) => p);
 
-console.log(sampleProducts === copied);        // false  ← 배열은 새것
-console.log(sampleProducts[0] === copied[0]);  // true   ← 객체는 같은 것
+console.log(sampleProducts === copied); // false  ← 배열은 새것
+console.log(sampleProducts[0] === copied[0]); // true   ← 객체는 같은 것
 ```
 
 ```
@@ -779,7 +802,7 @@ map(p => p) 실행
 ```js
 const a = [1, 2, 3];
 const b = a;
-console.log(a === b);   // true   ← 쪽지는 두 장이지만 적힌 주소가 같다
+console.log(a === b); // true   ← 쪽지는 두 장이지만 적힌 주소가 같다
 ```
 
 변수를 두 개 쓰면 쪽지는 **항상** 두 장이다. 그러므로 "쪽지가 두 장이라서 `false`"는 성립하지 않는다.
@@ -800,7 +823,7 @@ const copied = sampleProducts.map(p => p)
 
 ```js
 copied[0].price = 0;
-console.log(sampleProducts[0].price);   // 0   ← 원본도 바뀐다
+console.log(sampleProducts[0].price); // 0   ← 원본도 바뀐다
 ```
 
 **멘토 메모 "map 안의 객체는 새로운 것이 아니다"가 이 말이었다.**
@@ -808,15 +831,15 @@ console.log(sampleProducts[0].price);   // 0   ← 원본도 바뀐다
 ### 칸 안을 바꾸는 것과 칸을 바꾸는 것
 
 ```js
-copied[0].price = 0;         // ① 주소가 가리키는 집 안을 바꿈  → 원본도 바뀜
-copied[1] = { title: "..." } // ② 장부 칸에 다른 주소를 적음     → 원본은 그대로
+copied[0].price = 0; // ① 주소가 가리키는 집 안을 바꿈  → 원본도 바뀜
+copied[1] = { title: "..." }; // ② 장부 칸에 다른 주소를 적음     → 원본은 그대로
 ```
 
 M1-12a의 구분이 배열 칸에 적용된 것이다. 등호 왼쪽에 **속성 접근이 있으면 ①**, **칸 자체에 대입하면 ②**.
 
 ```js
-obj4.n = 2;        // 집 안을 바꿈    → 원본도 바뀜
-obj4 = { n: 2 };   // 쪽지를 바꿔 씀  → 원본은 그대로
+obj4.n = 2; // 집 안을 바꿈    → 원본도 바뀜
+obj4 = { n: 2 }; // 쪽지를 바꿔 씀  → 원본은 그대로
 ```
 
 방향은 상관없다. 원본을 바꾸든 `copied`를 바꾸든 같은 집을 보고 있으므로 양쪽에서 다 보인다.
@@ -832,9 +855,9 @@ obj4 = { n: 2 };   // 쪽지를 바꿔 씀  → 원본은 그대로
 ```js
 const copied = sampleProducts.map((p) => ({ ...p }));
 
-console.log(sampleProducts[0] === copied[0]);   // false  ← 새 집
+console.log(sampleProducts[0] === copied[0]); // false  ← 새 집
 copied[0].price = 0;
-console.log(sampleProducts[0].price);           // 9.99   ← 원본 안전
+console.log(sampleProducts[0].price); // 9.99   ← 원본 안전
 ```
 
 **괄호를 빠뜨리면 안 된다.**
@@ -849,7 +872,7 @@ console.log(sampleProducts[0].price);           // 9.99   ← 원본 안전
 ### 얕은 복사의 한계
 
 ```js
-console.log(sampleProducts[0].reviews === copied[0].reviews);   // true ← 여전히 공유
+console.log(sampleProducts[0].reviews === copied[0].reviews); // true ← 여전히 공유
 ```
 
 `{ ...p }`는 p의 속성들을 새 객체에 **옮겨 담을 뿐**이다. `reviews`는 배열(참조 타입)이라 **주소가 옮겨 담긴다.**
@@ -867,8 +890,8 @@ console.log(sampleProducts[0].reviews === copied[0].reviews);   // true ← 여�
 처음에 이렇게 확인했더니 진짜 모습이 안 드러났다.
 
 ```js
-sampleProducts.filter((p) => p);      // 전부 통과 → 개수 그대로
-sampleProducts.reduce((p) => p);      // 누적값을 그대로 반환 → 첫 요소
+sampleProducts.filter((p) => p); // 전부 통과 → 개수 그대로
+sampleProducts.reduce((p) => p); // 누적값을 그대로 반환 → 첫 요소
 ```
 
 **콜백이 아무 일도 하지 않으면 메서드의 성격이 드러나지 않는다.** `filter`는 조건을 줘야 하고, `reduce`는 두 번째 매개변수까지 써야 한다.
@@ -881,13 +904,13 @@ sampleProducts.reduce((p) => p);      // 누적값을 그대로 반환 → 첫 �
 콜백이 **`true`/`false`를 돌려주길** 기대한다. "이걸 남길까요?"를 묻는 것.
 
 ```js
-sampleProducts.filter((p) => p.price > 15);    // 조건에 맞는 것만
+sampleProducts.filter((p) => p.price > 15); // 조건에 맞는 것만
 ```
 
 **항상 배열을 돌려준다.** 0개여도 `[]`, 1개여도 `[{...}]`.
 
 ```js
-Array.isArray(sampleProducts.filter((p) => p.price > 100));   // true
+Array.isArray(sampleProducts.filter((p) => p.price > 100)); // true
 ```
 
 ### 헷갈렸던 것 — filter와 find
@@ -895,14 +918,14 @@ Array.isArray(sampleProducts.filter((p) => p.price > 100));   // true
 처음에 "filter는 배열이 될 수도 객체가 될 수도 있다"고 생각했는데, 그건 `find`다.
 
 ```js
-products.filter((p) => p.id === 1)   // [{...}]  ← 배열 (1개짜리)
-products.find((p) => p.id === 1)     // {...}    ← 객체 그 자체
+products.filter((p) => p.id === 1); // [{...}]  ← 배열 (1개짜리)
+products.find((p) => p.id === 1); // {...}    ← 객체 그 자체
 ```
 
-| | 돌려주는 것 | 못 찾으면 |
-|---|---|---|
-| `filter` | **배열** (조건에 맞는 전부) | `[]` 빈 배열 |
-| `find` | **요소 자체** (처음 찾은 하나) | `undefined` |
+|          | 돌려주는 것                    | 못 찾으면    |
+| -------- | ------------------------------ | ------------ |
+| `filter` | **배열** (조건에 맞는 전부)    | `[]` 빈 배열 |
+| `find`   | **요소 자체** (처음 찾은 하나) | `undefined`  |
 
 > `filter`는 체로 거르는 것 — 남은 것들을 그릇에 담아 준다.
 > `find`는 찾아서 집어 오는 것 — 손에 하나를 쥐여 준다.
@@ -914,7 +937,7 @@ products.find((p) => p.id === 1)     // {...}    ← 객체 그 자체
 콜백이 두 개를 받는다.
 
 ```js
-(누적값, 현재요소) => 새_누적값
+(누적값, 현재요소) => 새_누적값;
 ```
 
 ```js
@@ -937,20 +960,20 @@ sampleProducts.reduce((acc, cur) => acc + cur.price, 0);
 ### reduce가 돌려주는 타입은 내가 정한다
 
 ```js
-reduce((acc, cur) => acc + cur.price, 0)    // 59.97                 (숫자)
-reduce((acc, cur) => acc + cur.brand, "")   // "EssenceGlamour..."   (문자열)
+reduce((acc, cur) => acc + cur.price, 0); // 59.97                 (숫자)
+reduce((acc, cur) => acc + cur.brand, ""); // "EssenceGlamour..."   (문자열)
 ```
 
 시작값을 `[]`나 `{}`로 주면 배열이나 객체도 만들 수 있다. `map`과 `filter`가 하는 일을 `reduce`로 전부 흉내 낼 수 있다. **그래서 가장 강력하고 가장 어렵다.**
 
 ### 정리
 
-| | 콜백이 돌려줘야 할 것 | 메서드가 돌려주는 것 | 개수 |
-|---|---|---|---|
-| `map` | 변환된 값 | **새 배열** | 그대로 (n → n) |
-| `filter` | `true` / `false` | **새 배열** | 줄어듦 (n → 0~n) |
-| `find` | `true` / `false` | **요소 자체** | 하나 또는 `undefined` |
-| `reduce` | 새 누적값 | **내가 정한 것** | 하나 |
+|          | 콜백이 돌려줘야 할 것 | 메서드가 돌려주는 것 | 개수                  |
+| -------- | --------------------- | -------------------- | --------------------- |
+| `map`    | 변환된 값             | **새 배열**          | 그대로 (n → n)        |
+| `filter` | `true` / `false`      | **새 배열**          | 줄어듦 (n → 0~n)      |
+| `find`   | `true` / `false`      | **요소 자체**        | 하나 또는 `undefined` |
+| `reduce` | 새 누적값             | **내가 정한 것**     | 하나                  |
 
 > `map`은 컨베이어 벨트 — 3개 넣으면 3개 나온다
 > `filter`는 체 — 3개 넣으면 0~3개가 남는다
@@ -972,29 +995,43 @@ reduce((acc, cur) => acc + cur.brand, "")   // "EssenceGlamour..."   (문자열)
 메서드를 실행한 뒤 **원본만** 찍어본다. 반환값은 받지 않는다.
 
 ```js
-const fresh = () => [3, 1, 2];   // 매번 새 배열을 만드는 함수
+const fresh = () => [3, 1, 2]; // 매번 새 배열을 만드는 함수
 
 let a;
-a = fresh(); a.push(4);       console.log("push   ", a);
-a = fresh(); a.pop();         console.log("pop    ", a);
-a = fresh(); a.sort();        console.log("sort   ", a);
-a = fresh(); a.reverse();     console.log("reverse", a);
-a = fresh(); a.splice(1, 1);  console.log("splice ", a);
-a = fresh(); a.slice(0, 2);   console.log("slice  ", a);
-a = fresh(); a.concat(4);     console.log("concat ", a);
+a = fresh();
+a.push(4);
+console.log("push   ", a);
+a = fresh();
+a.pop();
+console.log("pop    ", a);
+a = fresh();
+a.sort();
+console.log("sort   ", a);
+a = fresh();
+a.reverse();
+console.log("reverse", a);
+a = fresh();
+a.splice(1, 1);
+console.log("splice ", a);
+a = fresh();
+a.slice(0, 2);
+console.log("slice  ", a);
+a = fresh();
+a.concat(4);
+console.log("concat ", a);
 ```
 
 ### 결과
 
-| 메서드 | 원본 | 반환값 |
-|---|---|---|
-| `push(4)` | `[3,1,2,4]` **변함** | `4` (새 길이) |
-| `pop()` | `[3,1]` **변함** | `2` (꺼낸 요소) |
-| `sort()` | `[1,2,3]` **변함** | `[1,2,3]` (원본 자체) |
-| `reverse()` | `[2,1,3]` **변함** | `[2,1,3]` (원본 자체) |
-| `splice(1,1)` | `[3,2]` **변함** | `[1]` (제거된 요소들) |
-| `slice(0,2)` | `[3,1,2]` 그대로 | `[3,1]` (새 배열) |
-| `concat(4)` | `[3,1,2]` 그대로 | `[3,1,2,4]` (새 배열) |
+| 메서드        | 원본                 | 반환값                |
+| ------------- | -------------------- | --------------------- |
+| `push(4)`     | `[3,1,2,4]` **변함** | `4` (새 길이)         |
+| `pop()`       | `[3,1]` **변함**     | `2` (꺼낸 요소)       |
+| `sort()`      | `[1,2,3]` **변함**   | `[1,2,3]` (원본 자체) |
+| `reverse()`   | `[2,1,3]` **변함**   | `[2,1,3]` (원본 자체) |
+| `splice(1,1)` | `[3,2]` **변함**     | `[1]` (제거된 요소들) |
+| `slice(0,2)`  | `[3,1,2]` 그대로     | `[3,1]` (새 배열)     |
+| `concat(4)`   | `[3,1,2]` 그대로     | `[3,1,2,4]` (새 배열) |
 
 **변경 메서드**: `push` `pop` `sort` `reverse` `splice`
 **비변경 메서드**: `slice` `concat` — 그리고 `map` `filter` `find` `reduce` `join`
@@ -1004,7 +1041,7 @@ a = fresh(); a.concat(4);     console.log("concat ", a);
 **변경 메서드는 "결과 배열"을 돌려주지 않는다.** 원본을 직접 고치는 것이 일이므로 반환값은 부가 정보다.
 
 ```js
-const result = arr.push(4);   // result = 4  (배열이 아님!)
+const result = arr.push(4); // result = 4  (배열이 아님!)
 ```
 
 "push한 결과를 변수에 담아야지" 하고 쓰면 숫자가 들어온다.
@@ -1012,7 +1049,7 @@ const result = arr.push(4);   // result = 4  (배열이 아님!)
 ### sort의 함정
 
 ```js
-b.sort() === b;   // true
+b.sort() === b; // true
 ```
 
 **`sort`가 돌려주는 것은 새 배열이 아니라 원본 그 자체다.** 같은 주소를 다시 건네줄 뿐이다.
@@ -1032,10 +1069,10 @@ const sorted = [...products].sort((a, b) => a.price - b.price);
 
 ### slice와 splice — 한 글자 차이, 정반대 성격
 
-| | 영어 뜻 | 하는 일 |
-|---|---|---|
-| **slice** | 얇게 **썰어 가져오다** | 원본은 두고 잘라낸 사본을 준다 |
-| **splice** | 잘라 **이어 붙이다** | 원본을 직접 수술한다 |
+|            | 영어 뜻                | 하는 일                        |
+| ---------- | ---------------------- | ------------------------------ |
+| **slice**  | 얇게 **썰어 가져오다** | 원본은 두고 잘라낸 사본을 준다 |
+| **splice** | 잘라 **이어 붙이다**   | 원본을 직접 수술한다           |
 
 > `slice`는 빵을 썰어 한 조각 가져오는 것, `splice`는 필름을 잘라내고 다시 이어 붙이는 것. 후자는 원본 필름이 바뀐다.
 
@@ -1044,10 +1081,10 @@ const sorted = [...products].sort((a, b) => a.price - b.price);
 ### 원본을 바꾸지 않는 최신 버전
 
 ```js
-arr.toSorted()     // 정렬된 새 배열 (원본 그대로)
-arr.toReversed()   // 뒤집힌 새 배열
-arr.toSpliced()    // splice 결과를 새 배열로
-arr.with(0, 99)    // 0번째만 바꾼 새 배열
+arr.toSorted(); // 정렬된 새 배열 (원본 그대로)
+arr.toReversed(); // 뒤집힌 새 배열
+arr.toSpliced(); // splice 결과를 새 배열로
+arr.with(0, 99); // 0번째만 바꾼 새 배열
 ```
 
 **`to`로 시작하면 원본을 바꾸지 않는 버전**이다. 비교적 최근에 추가되었고 현재 브라우저에서 동작한다.
@@ -1129,21 +1166,21 @@ productList.addEventListener("click", (event) => {
 
 리스너는 `<ul>`에 달았지만 `event.target`은 `<ul>`이 아니다.
 
-| 클릭한 곳 | `event.target` |
-|---|---|
-| 상품 이미지 | `<img class="product-card__image">` |
-| 상품명 | `<h3 class="product-card__name">` |
-| 담기 버튼 | `<button class="product-card__add">` |
+| 클릭한 곳   | `event.target`                       |
+| ----------- | ------------------------------------ |
+| 상품 이미지 | `<img class="product-card__image">`  |
+| 상품명      | `<h3 class="product-card__name">`    |
+| 담기 버튼   | `<button class="product-card__add">` |
 
 그래서 **"담기 버튼이 맞는지" 걸러내는 과정이 반드시 필요하다.** 필터가 없으면 이미지를 눌러도 담기가 실행된다.
 
 ### 이번에 쓴 DOM API
 
-| 문법 | 하는 일 |
-|---|---|
-| `event.target` | 실제로 클릭된 요소 |
+| 문법                                     | 하는 일                               |
+| ---------------------------------------- | ------------------------------------- |
+| `event.target`                           | 실제로 클릭된 요소                    |
 | `element.classList.contains("클래스명")` | 그 클래스를 가졌는지 `true` / `false` |
-| `element.dataset.id` | `data-id` 속성값을 꺼낸다 |
+| `element.dataset.id`                     | `data-id` 속성값을 꺼낸다             |
 
 ---
 
@@ -1152,7 +1189,7 @@ productList.addEventListener("click", (event) => {
 ### 확인
 
 ```js
-console.log(productId, typeof productId);   // "5" string
+console.log(productId, typeof productId); // "5" string
 ```
 
 ### 이유
@@ -1196,7 +1233,7 @@ const productId = Number(clicked.dataset.id);
 
 ```js
 async function render() {
-    const products = await loadProducts();   // ← 이 안에서만 살아 있다
+    const products = await loadProducts(); // ← 이 안에서만 살아 있다
 }
 
 productList.addEventListener("click", () => {
@@ -1211,7 +1248,7 @@ productList.addEventListener("click", () => {
 ### 해결 — 바깥으로 꺼낸다
 
 ```js
-let products = [];                   // 바깥에 선언
+let products = []; // 바깥에 선언
 
 async function render() {
     products = await loadProducts(); // const 를 떼고 바깥 변수에 담는다
@@ -1220,15 +1257,15 @@ async function render() {
 
 ### `let` vs `const` — 이번에 둘 다 나왔다
 
-| 변수 | 선언 | 이유 |
-|---|---|---|
-| `products` | `let` | 빈 배열로 시작했다가 API 결과로 **통째로 갈아끼운다** |
-| `cart` | `const` | `push`로 **안의 내용만** 바꾼다. 배열 자체를 교체하지 않는다 |
+| 변수       | 선언    | 이유                                                         |
+| ---------- | ------- | ------------------------------------------------------------ |
+| `products` | `let`   | 빈 배열로 시작했다가 API 결과로 **통째로 갈아끼운다**        |
+| `cart`     | `const` | `push`로 **안의 내용만** 바꾼다. 배열 자체를 교체하지 않는다 |
 
 ```js
 const cart = [];
-cart.push(상품);   // ✅ 내용을 바꾸는 것
-cart = [];        // ❌ 통째로 갈아끼우는 것 → TypeError
+cart.push(상품); // ✅ 내용을 바꾸는 것
+cart = []; // ❌ 통째로 갈아끼우는 것 → TypeError
 ```
 
 **`const`는 "이 변수가 가리키는 주소를 못 바꾼다"는 뜻**이지 내용물을 못 바꾼다는 뜻이 아니다. 집 주소는 고정이지만 가구는 옮길 수 있는 것과 같다.
@@ -1264,8 +1301,8 @@ productList.addEventListener("click", (event) => {
 ### 콜백 매개변수 이름
 
 ```js
-products.find((product) => product.id === productId);   // 동작은 하지만 읽기 어렵다
-products.find((p) => p.id === productId);               // 관례
+products.find((product) => product.id === productId); // 동작은 하지만 읽기 어렵다
+products.find((p) => p.id === productId); // 관례
 ```
 
 콜백 매개변수는 **그 괄호 안에서만 살다 사라지는 임시 이름**이라 짧아도 된다. 반대로 오래 쓸 변수는 길어도 명확한 편이 낫다. **수명이 짧을수록 이름도 짧게.**
@@ -1288,15 +1325,15 @@ function updateCartCount() {
 
 ### 글자를 바꾸는 속성 세 가지
 
-| 속성 | 하는 일 |
-|---|---|
-| `innerHTML` | 문자열을 **HTML로 해석**해서 넣는다 |
-| `textContent` | 문자열을 **글자 그대로** 넣는다 |
-| `innerText` | 글자를 넣되 **화면에 보이는 모양** 기준 |
+| 속성          | 하는 일                                 |
+| ------------- | --------------------------------------- |
+| `innerHTML`   | 문자열을 **HTML로 해석**해서 넣는다     |
+| `textContent` | 문자열을 **글자 그대로** 넣는다         |
+| `innerText`   | 글자를 넣되 **화면에 보이는 모양** 기준 |
 
 ```js
-el.innerHTML   = "<b>3</b>";   // 굵은 3   (태그가 살아남)
-el.textContent = "<b>3</b>";   // <b>3</b> (글자 그대로)
+el.innerHTML = "<b>3</b>"; // 굵은 3   (태그가 살아남)
+el.textContent = "<b>3</b>"; // <b>3</b> (글자 그대로)
 ```
 
 **넣으려는 것이 태그면 `innerHTML`, 글자면 `textContent`.**
@@ -1304,34 +1341,6 @@ el.textContent = "<b>3</b>";   // <b>3</b> (글자 그대로)
 `render()`에서 `innerHTML`을 쓴 것은 실제로 `<li>` 태그를 만들어야 했기 때문이고, 숫자 하나를 넣는 데는 `textContent`가 맞다.
 
 `innerHTML`은 바깥에서 들어온 값(사용자 입력, API 응답)을 넣을 때 **스크립트가 섞여 들어올 수 있다.** 실무에서 `innerHTML`을 조심하라고 하는 이유다. 기본값은 `textContent`.
-
-### 겪은 에러 — ReferenceError
-
-```js
-const cartCounter = ...;        // er 로 끝남
-
-function updateCartCount() {
-    cartCounter.textContent = cart.length;
-    console.log(cartCount);     // ← 그런 변수는 없다
-}
-```
-
-```
-Uncaught ReferenceError: cartCount is not defined
-```
-
-| 에러 | 뜻 |
-|---|---|
-| `ReferenceError` | 그런 이름의 변수가 **아예 없다** (오타이거나 스코프 밖) |
-| `TypeError` | 있긴 한데 **그렇게 쓸 수 없다** (예: `true()`) |
-
-**뱃지 숫자는 바뀌었는데 콘솔엔 에러가 떠 있었다.** 에러 나기 전 줄이 먼저 실행됐기 때문이다. 화면이 멀쩡해 보여도 콘솔은 확인해야 한다.
-
-### 테스트는 파일이 아니라 콘솔에서
-
-일회성 확인 코드를 파일에 적으면 지우는 것을 잊고 커밋된다. 브라우저 콘솔은 새로고침하면 사라지므로 안전하다.
-
----
 
 ## M2-6 — 담기와 헤더 숫자 연결
 
@@ -1360,11 +1369,11 @@ function updateCartCount() { ... }            // 정의는 아래
 
 ```js
 // 함수 선언식 — 호이스팅된다
-sayHi();                    // ✅
+sayHi(); // ✅
 function sayHi() {}
 
 // 함수 표현식 — 그 줄이 실행된 뒤부터
-sayHi();                    // ❌ ReferenceError
+sayHi(); // ❌ ReferenceError
 const sayHi = () => {};
 ```
 
@@ -1377,7 +1386,7 @@ const sayHi = () => {};
 ## 참조 확인 — cart와 products는 같은 객체였다
 
 ```js
-console.log(cart[0] === products.find((p) => p.id === cart[0].id));   // true
+console.log(cart[0] === products.find((p) => p.id === cart[0].id)); // true
 ```
 
 `cart.push(product)`는 **주소를 한 번 더 적은 것**이다. 복사본이 아니다.
@@ -1395,7 +1404,7 @@ cart      [ ●——— ]
 
 ```js
 cart[0].quantity = 99;
-products.find((p) => p.id === cart[0].id).quantity;   // 99
+products.find((p) => p.id === cart[0].id).quantity; // 99
 ```
 
 `cart`만 건드렸는데 `products`가 같이 바뀐다.
