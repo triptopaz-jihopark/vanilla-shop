@@ -109,7 +109,12 @@ productList.addEventListener("click", (event) => {
     if (clicked.classList.contains("product-card__add")) {
         const productId = Number(clicked.dataset.id);
         const product = products.find((p) => p.id === productId);
-        cart.push(product);
+        const cartItem = cart.find((item) => item.id === productId);
+        if (cartItem) {
+            cartItem.quantity += 1;
+        } else {
+            cart.push({...product, quantity: 1});
+        }
         updateCartCount();
     }
 });
