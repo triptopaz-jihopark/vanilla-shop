@@ -119,6 +119,7 @@ productList.addEventListener("click", (event) => {
     }
 });
 
+// 뱃지는 상품 종류 수를 표시한다. 수량은 장바구니 상세에서 품목별로 보여준다.
 function updateCartCount() {
     cartCounter.textContent = cart.length;
 }
