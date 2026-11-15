@@ -6,6 +6,7 @@ const cartCounter = document.querySelector(".cart-button__count");
 let products = [];
 const cart = [];
 
+// ── 3. 함수 ──────────────────────
 function createProductCard(product) {
     return `
          <li class="product-card" data-id="${product.id}">
@@ -61,7 +62,7 @@ async function render() {
 }
 render();
 
-productList.addEventListener("click", (event) => {
+function handleProductListClick(event) {
     const clicked = event.target;
 
     if (clicked.classList.contains("product-card__add")) {
@@ -75,7 +76,7 @@ productList.addEventListener("click", (event) => {
         }
         updateCartCount();
     }
-});
+}
 
 // 뱃지는 상품 종류 수를 표시한다. 수량은 장바구니 상세에서 품목별로 보여준다.
 function updateCartCount() {
