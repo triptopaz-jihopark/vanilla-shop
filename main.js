@@ -4,7 +4,7 @@ const cartCounter = document.querySelector(".cart-button__count");
 
 // ── 2. 상태 ──────────────────────
 let products = [];
-const cart = [];
+let cart = [];
 
 // ── 3. 함수 ──────────────────────
 function createProductCard(product) {
@@ -72,6 +72,7 @@ function handleProductListClick(event) {
         } else {
             cart.push({...product, quantity: 1});
         }
+        localStorage.setItem("cart", JSON.stringify(cart));
         updateCartCount();
     }
 }
@@ -85,6 +86,9 @@ function updateCartCount() {
 function init() {
     productList.addEventListener("click", handleProductListClick);
     render();
+
+    cart = JSON.parse(localStorage.getItem("cart")) ?? [];
+    updateCartCount();
 }
 
 init();
