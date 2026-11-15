@@ -1834,9 +1834,9 @@ updateCartCount();
 
 `const`를 유지한 채 `cart.push(...저장값)`으로 내용만 채우는 방법도 있으나, "읽어온 값을 그대로 사용한다"는 의도는 재할당 쪽이 더 직접적으로 드러난다.
 
-### 검토 중 — `init` 내부 실행 순서
+### `init` 내부 실행 순서 조정
 
-현재 순서는 다음과 같다.
+정리 직후의 순서는 다음과 같았다.
 
 ```js
 function init() {
@@ -1857,7 +1857,19 @@ function init() {
 | 3. `updateCartCount()` | 3. `updateCartCount()` |
 | | 4. `render()` 재개 → 카드 렌더링 |
 
-복원을 앞으로 옮기면 읽는 순서와 실행 순서가 일치하고, "상태를 먼저 복원한 뒤 화면을 그린다"는 의도도 분명해진다. 다음 작업에서 조정한다.
+복원을 앞으로 옮기면 읽는 순서와 실행 순서가 일치하고, "상태를 먼저 복원한 뒤 화면을 그린다"는 의도도 분명해진다. 아래와 같이 조정했다.
+
+```js
+function init() {
+    cart = JSON.parse(localStorage.getItem("cart")) ?? []; // 저장된 장바구니 복원
+    updateCartCount(); // 헤더 반영
+
+    productList.addEventListener("click", handleProductListClick);
+    render(); // 상품 목록 그리기
+}
+```
+
+빈 줄로 "상태 복원"과 "화면 시작" 두 단계를 구분했다.
 
 ### 다음 — M3-5
 
