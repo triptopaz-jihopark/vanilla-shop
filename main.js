@@ -1,39 +1,3 @@
-// 상품 목록 렌더링 흐름
-// 1. createProductCard — 상품 객체를 받아 카드 HTML 문자열을 돌려준다
-// 2. loadProducts      — API를 호출하고 응답을 두 번 벗긴 뒤 상품 배열을 반환한다
-// 3. render            — 배열을 map으로 카드 HTML로 바꾸고 join으로 합쳐 삽입한다
-
-// [1-12 재료] 참조/값 실습용 샘플 데이터. 렌더링에는 더 이상 쓰지 않음
-const sampleProducts = [
-    {
-        id: 1,
-        thumbnail: "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp",
-        brand: "Essence",
-        title: "Essence Mascara Lash Princess",
-        price: 9.99,
-        rating: 2.56,
-        reviews: [{}, {}, {}],
-    },
-    {
-        id: 2,
-        thumbnail: "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/thumbnail.webp",
-        brand: "Glamour Beauty",
-        title: "Eyeshadow Palette with Mirror",
-        price: 19.99,
-        rating: 3.56,
-        reviews: [{}, {}, {}],
-    },
-    {
-        id: 3,
-        thumbnail: "https://cdn.dummyjson.com/product-images/beauty/powder-canister/thumbnail.webp",
-        brand: "Glamour Beauty",
-        title: "Eyeshadow Palette with Mirror",
-        price: 29.99,
-        rating: 3.56,
-        reviews: [{}, {}, {}],
-    },
-];
-
 function createProductCard(product) {
     return `
          <li class="product-card" data-id="${product.id}">
@@ -92,14 +56,6 @@ async function render() {
     }
 }
 render();
-
-// const isProduction = (product) => true;
-// const isTest = function (env) {
-//     return true;
-// };
-// (function () {
-//     console.log("IEEF");
-// })();
 
 const cart = [];
 
