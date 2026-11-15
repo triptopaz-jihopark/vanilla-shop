@@ -1,3 +1,11 @@
+// ── 1. 요소 ──────────────────────
+const productList = document.querySelector(".product-list");
+const cartCounter = document.querySelector(".cart-button__count");
+
+// ── 2. 상태 ──────────────────────
+let products = [];
+const cart = [];
+
 function createProductCard(product) {
     return `
          <li class="product-card" data-id="${product.id}">
@@ -26,10 +34,6 @@ function createProductCard(product) {
     `;
 }
 
-const productList = document.querySelector(".product-list");
-const cartCounter = document.querySelector(".cart-button__count");
-let products = [];
-
 // 상품 API 호출
 async function loadProducts() {
     const response = await fetch("https://dummyjson.com/products");
@@ -56,8 +60,6 @@ async function render() {
     }
 }
 render();
-
-const cart = [];
 
 productList.addEventListener("click", (event) => {
     const clicked = event.target;
