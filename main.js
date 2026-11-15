@@ -53,14 +53,12 @@ async function render() {
     try {
         products = await loadProducts();
 
-        // join("")을 빼면 배열이 문자열로 변환될 때 쉼표가 들어간다.
         productList.innerHTML = products.map((product) => createProductCard(product)).join("");
     } catch (error) {
         console.error(error);
         productList.innerHTML = `<li class="product-list__error">상품 리스트를 불러올 수 없습니다.</li>`;
     }
 }
-render();
 
 function handleProductListClick(event) {
     const clicked = event.target;
@@ -82,3 +80,11 @@ function handleProductListClick(event) {
 function updateCartCount() {
     cartCounter.textContent = cart.length;
 }
+
+// ── 4. 시작 ──────────────────────
+function init() {
+    productList.addEventListener("click", handleProductListClick);
+    render();
+}
+
+init();
