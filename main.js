@@ -84,11 +84,11 @@ function updateCartCount() {
 
 // ── 4. 시작 ──────────────────────
 function init() {
-    productList.addEventListener("click", handleProductListClick);
-    render();
+    cart = JSON.parse(localStorage.getItem("cart")) ?? []; // 저장된 장바구니 복원
+    updateCartCount(); //헤더 반영
 
-    cart = JSON.parse(localStorage.getItem("cart")) ?? [];
-    updateCartCount();
+    productList.addEventListener("click", handleProductListClick);
+    render(); // 상품 목록 그리기
 }
 
 init();
