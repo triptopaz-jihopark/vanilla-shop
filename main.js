@@ -84,12 +84,24 @@ function updateCartCount() {
 
 // 장바구니 저장
 function saveCart() {
-    sessionStorage.setItem("cart", JSON.stringify(cart));
+    localStorage.setItem("cart", JSON.stringify(cart));
+    // document.cookie = `cart=${encodeURIComponent(JSON.stringify(cart))}; path=/; max-age=604800;`;
 }
 
 // 저장된 장바구니 복원
 function loadCart() {
-    return JSON.parse(sessionStorage.getItem("cart")) ?? [];
+    return JSON.parse(localStorage.getItem("cart")) ?? [];
+
+    // const cookies = document.cookie.split("; ");
+    // console.log(cookies);
+    // const cartCookie = cookies.find((item) => item.startsWith("cart="));
+    // if (cartCookie) {
+    //     const cartCookieValue = cartCookie.slice(5);
+    //     console.log(cartCookieValue);
+    //     return JSON.parse(decodeURIComponent(cartCookieValue));
+    // } else {
+    //     return [];
+    // }
 }
 
 // ── 4. 시작 ──────────────────────
