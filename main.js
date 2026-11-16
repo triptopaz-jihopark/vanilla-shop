@@ -84,12 +84,12 @@ function updateCartCount() {
 
 // 장바구니 저장
 function saveCart() {
-    localStorage.setItem("cart", JSON.stringify(cart));
+    sessionStorage.setItem("cart", JSON.stringify(cart));
 }
 
 // 저장된 장바구니 복원
 function loadCart() {
-    return JSON.parse(localStorage.getItem("cart")) ?? [];
+    return JSON.parse(sessionStorage.getItem("cart")) ?? [];
 }
 
 // ── 4. 시작 ──────────────────────
