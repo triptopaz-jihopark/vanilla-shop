@@ -1874,3 +1874,130 @@ function init() {
 ### 다음 — M3-5
 
 저장 코드가 현재 `handleProductListClick` 한 곳에만 있다. M4에서 수량 변경·삭제가 추가되면 같은 호출이 여러 곳에 반복된다. `saveCart` · `loadCart` 함수로 분리하는 것이 M3-5의 내용이며, 이후 `sessionStorage` · `cookie` 버전으로 교체하기 위한 준비이기도 하다.
+
+---
+
+## M3-5 ~ M3-10 — 저장소 교체와 비교
+
+비교 결과와 최종 선택은 `docs/STORAGE.md`에 별도로 정리했다. 여기에는 구현 과정에서 배운 문법과 판단을 남긴다.
+
+### M3-5 — 저장·복원을 함수로 분리
+
+저장 코드가 `handleProductListClick`에, 복원 코드가 `init`에 각각 흩어져 있었다. 두 동작을 함수로 묶었다.
+
+```js
+function saveCart() {
+    localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function loadCart() {
+    return JSON.parse(localStorage.getItem("cart")) ?? [];
+}
+```
+
+이후 `sessionStorage`·`cookie`로 교체할 때 **이 두 함수 안만 고치면 되고 호출하는 쪽은 바뀌지 않는다.** 실제로 `sessionStorage` 교체는 두 줄 수정으로 끝났다.
+
+회사 코드의 `IRedisFavoriteRepository`와 같은 구조다. `MypageController`가 인터페이스만 알고 Redis를 모르듯, `init`은 `loadCart()`만 알고 `localStorage`를 모른다. **바뀔 수 있는 부분을 한 곳에 모아둔다**는 점이 같다.
+
+#### 대입형과 반환형
+
+처음에는 `loadCart`가 바깥 변수 `cart`를 직접 수정했다.
+
+```js
+function loadCart() {
+    cart = JSON.parse(...) ?? [];   // 읽기 + 대입
+}
+```
+
+반환형으로 변경했다.
+
+```js
+function loadCart() {
+    return JSON.parse(...) ?? [];   // 읽기만
+}
+
+// init 에서
+cart = loadCart();
+```
+
+두 가지 이유가 있다.
+
+1. **`cart`가 바뀌는 지점이 호출부에 드러난다.** 나중에 `cart`가 예상치 못한 값이 되었을 때 `cart =`로 검색하면 변경 지점을 모두 찾을 수 있다. 대입형은 함수 내부까지 확인해야 한다.
+2. **같은 파일의 `loadProducts()`와 형태가 일치한다.** `products = await loadProducts();`와 `cart = loadCart();`가 같은 모양이 된다.
+
+### M3-7 — 쿠키 구현
+
+#### 템플릿 리터럴은 백틱에서만 동작한다
+
+처음 작성한 코드가 저장은 되는데 값이 이상했다.
+
+```js
+document.cookie = "cart=$encodeURIComponent(Json.strigify(cart)); path=/;";
+```
+
+세 가지가 어긋나 있었다.
+
+| 문제 | 수정 |
+| --- | --- |
+| 큰따옴표 안에서는 `${}`가 치환되지 않는다 | 백틱 사용 |
+| `$` 뒤에 중괄호가 없다 | `${...}` |
+| `Json.strigify` 오타 | `JSON.stringify` |
+
+**에러가 나지 않은 것이 문제였다.** 백틱이 아니어서 전체가 글자로 취급됐고, `JSON.stringify`는 실행조차 되지 않았다. 템플릿 리터럴 안이었다면 `Json is not defined`가 떴을 것이다.
+
+#### 쿠키는 메서드가 없다
+
+```js
+document.cookie = "a=1";
+document.cookie = "b=2";
+document.cookie;          // "a=1; b=2"
+```
+
+대입처럼 보이지만 덮어쓰기가 아니라 **하나씩 추가**하는 동작이다. 읽을 때는 전체가 한 문자열로 나오므로 직접 잘라내야 한다.
+
+```js
+const cookies = document.cookie.split("; ");
+const cartCookie = cookies.find((item) => item.startsWith("cart="));
+```
+
+`"cart="` 뒤의 값을 꺼낼 때 `split("=")`을 쓰면 값 안에 `=`가 있을 경우 조각이 셋 이상으로 나뉜다. `"cart="`가 다섯 글자이므로 `slice(5)`를 썼다.
+
+#### `?? []`로 처리할 수 없는 경우
+
+`localStorage`에서는 한 줄로 끝났다.
+
+```js
+return JSON.parse(localStorage.getItem("cart")) ?? [];
+```
+
+`getItem`이 `null`을 반환하고 `JSON.parse(null)`도 `null`이므로 `??`가 받아낸다.
+
+쿠키는 다르다. `find`가 `undefined`를 반환하면 **그다음 줄에서 바로 `TypeError`가 난다.**
+
+```js
+const cartCookie = cookies.find(...);    // undefined
+cartCookie.slice(5);                     // TypeError
+```
+
+`?? []`는 "결과가 없을 때"를 막아주지만, 여기서는 "중간에 없어서 진행이 불가능한" 상황이다. **막아야 할 지점이 다르다.** `if (cartCookie)`로 분기했다.
+
+#### 4KB 초과는 조용히 거부된다
+
+상품 2건을 담자 화면에는 2로 표시되는데 새로고침하면 1로 돌아갔다.
+
+원인은 쿠키 용량 한도였다. 상품 객체 전체를 담으면 1건에 약 3,000자이고, 2건이면 6,000자를 넘어 쿠키 한도(약 4,096 bytes)를 초과한다. **`document.cookie` 대입이 에러 없이 무시되어** 이전 값이 그대로 남은 것이다.
+
+M2-4 노트에 "M3에서 저장소에 담을 때 다시 검토한다"고 적어둔 지점이 이것이었다.
+
+### 이번 구간에서 반복된 패턴
+
+M3에서 만난 문제는 모두 **에러 없이 틀리는** 종류였다.
+
+| 증상 | 원인 |
+| --- | --- |
+| `[object Object]` 저장됨 | `setItem`이 값을 문자열로 변환 |
+| `JSON.parse(null)`이 `null` 반환 | `String(null)`이 `"null"`이고 유효한 JSON |
+| 쿠키 값이 코드 문자열 그대로 | 백틱이 아니어서 치환되지 않음 |
+| 2건째부터 저장 안 됨 | 4KB 초과, 대입이 무시됨 |
+
+**조용히 틀리는 경우는 증상이 나타나는 지점과 원인이 떨어져 있다.** 중간값을 직접 확인하는 습관이 필요하다. 개발자도구 Application 탭과 Network 탭이 그 역할을 한다.
