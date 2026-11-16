@@ -72,7 +72,7 @@ function handleProductListClick(event) {
         } else {
             cart.push({...product, quantity: 1});
         }
-        localStorage.setItem("cart", JSON.stringify(cart));
+        saveCart();
         updateCartCount();
     }
 }
@@ -82,9 +82,19 @@ function updateCartCount() {
     cartCounter.textContent = cart.length;
 }
 
+// 장바구니 저장
+function saveCart() {
+    localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+// 저장된 장바구니 복원
+function loadCart() {
+    return JSON.parse(localStorage.getItem("cart")) ?? [];
+}
+
 // ── 4. 시작 ──────────────────────
 function init() {
-    cart = JSON.parse(localStorage.getItem("cart")) ?? []; // 저장된 장바구니 복원
+    cart = loadCart();
     updateCartCount(); //헤더 반영
 
     productList.addEventListener("click", handleProductListClick);
